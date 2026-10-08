@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zidan-v4';
+const CACHE_NAME = 'zidan-v5';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -23,13 +23,27 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Images (hero photo, icons): serve the saved copy instantly, refresh it in the background.
+  if (/\.(png|jpe?g|webp|svg|ico)$/i.test(url.pathname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(req);
+      const refresh = fetch(req.url).then(res => {
+        if (res && res.ok) cache.put(req, res.clone());
+        return res;
+      }).catch(() => null);
+      return cached || (await refresh) || Response.error();
+    })());
+    return;
+  }
+
   const isPage = req.mode === 'navigate';
   // Every page address (?p=...) shares one cached copy for offline use.
   const key = isPage ? new Request(url.origin + url.pathname) : req;
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // Network first, bypassing the browser cache, so every open gets the latest version.
+    // Pages: network first, bypassing the browser cache, so every open gets the latest version.
     const network = fetch(req.url, { cache: 'no-store', redirect: isPage ? 'manual' : 'follow' }).then(res => {
       if (res && res.ok) cache.put(key, res.clone());
       return res;
