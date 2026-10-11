@@ -167,8 +167,18 @@ async function load(){
   try{ const j = await call({ action: 'admin_list' }); if(!j.success) return j.error === 'auth' ? 'auth' : 'fail';
     items = j.items || []; try{ localStorage.setItem('zidan-admin-items', JSON.stringify(items)); }catch(e){} render(); return 'ok'; }catch(e){ return 'fail'; }
 }
+// قبل أي إرسال: نتأكد إن الكود المنشور في Apps Script هو النسخة الجديدة (لو قديم ممكن يسجّل صفوف فاضية في الشيت)
+async function scriptState(){
+  try{ const r = await fetch(API + '?action=meta&fresh=1', { cache: 'no-store' }); const m = await r.json(); return (m && Number(m.v) >= 8) ? 'ok' : 'old'; }catch(e){ return 'offline'; }
+}
 async function login(p){
   pin = p; $('#loginMsg').textContent = ''; $('#go').disabled = true;
+  const st = await scriptState();
+  if(st !== 'ok'){
+    $('#go').disabled = false; pin = '';
+    $('#loginMsg').textContent = st === 'old' ? 'كود Apps Script لسه قديم. انشره كنسخة جديدة (Deploy > Manage deployments > New version) وبعدها جرّب تاني.' : 'مفيش اتصال، جرّب تاني';
+    screen('login'); return;
+  }
   const r = await load(); $('#go').disabled = false;
   if(r === 'ok'){ try{ localStorage.setItem('zidan-admin-pin', pin); }catch(e){} screen('shell'); return; }
   pin = ''; try{ localStorage.removeItem('zidan-admin-pin'); }catch(e){}
