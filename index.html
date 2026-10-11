@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="build" content="20261008085500">
+<meta name="build" content="20261011180319">
 <link rel="preconnect" href="https://script.google.com">
 <link rel="preconnect" href="https://script.googleusercontent.com">
 <script>window.__early=fetch('https://script.google.com/macros/s/AKfycbyis5BlfCDMoULUIu61vd_uQfdLz5lsWw5cAhA7sLnRYpJPWRSfRFXRqoXTAkpA2exI/exec',{cache:'no-store'}).then(function(r){return r.json()}).catch(function(){return null});</script>
@@ -326,7 +326,7 @@ body::before{display:none;}
 
 #progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:70;transform:scaleX(0);transform-origin:100% 50%;background:var(--btn);pointer-events:none;}
 header{animation:down .7s cubic-bezier(.2,.8,.2,1) both;}
-.hero-bg{animation:zoom 1.8s ease both,kenburns 26s ease-in-out 1.8s infinite alternate;}
+.hero-bg{animation:zoom 1.8s ease both,kenburns 20s ease-out 1.8s 1 both;}
 .scroll-hint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:3;width:26px;height:42px;border:2px solid rgba(255,255,255,.55);border-radius:14px;display:block;}
 .scroll-hint span{position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:#f4efe4;animation:wheel 1.8s ease-in-out infinite;}
 @media(hover:none){.scroll-hint{display:none;}}
@@ -400,6 +400,14 @@ html.js .services.reveal.in li{opacity:1;transform:none;}
   .d-sticky .btn{flex:1;justify-content:center;}
 }
 .priv{margin:10px 0 0;font-size:12px;color:var(--muted);text-align:center;}
+/* smoother scrolling: no live blur on small elements, skip painting sections that are off-screen */
+.gi,.badge,.pill,.btn-glass,.info,.intent-card,.glass-card,.ph-note,.theme-toggle{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+header.is-scrolled{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+#how,#sell,#about,#contact,footer{content-visibility:auto;contain-intrinsic-size:auto 560px;}
+.announce{display:flex;gap:10px;align-items:center;margin:0 0 18px;padding:12px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--gold2);font-weight:700;}
+.announce[hidden]{display:none;}
+.announce .ic{color:var(--gold);flex-shrink:0;}
+.badge-feat{background:linear-gradient(135deg,#f6d77e,#d9a93a);color:#2a1d00;}
 </style>
 </head>
 <body>
@@ -463,7 +471,7 @@ html.js .services.reveal.in li{opacity:1;transform:none;}
 
 <div class="strip"><div class="wrap">
   <span class="info"><svg class="ic"><use href="#i-pin"/></svg>إيتاي البارود والقرى التابعة لها</span>
-  <a class="info" href="tel:01508658715"><svg class="ic"><use href="#i-phone"/></svg><span dir="ltr">01508658715</span></a>
+  <a class="info" href="tel:01508658715"><svg class="ic"><use href="#i-phone"/></svg><span dir="ltr" class="js-phone">01508658715</span></a>
 </div></div>
 
 <section class="intent"><div class="wrap"><div class="intent-grid reveal">
@@ -478,6 +486,7 @@ html.js .services.reveal.in li{opacity:1;transform:none;}
       <h2>العقارات المتاحة</h2>
       <p>عروض بيع وإيجار في إيتاي البارود والقرى التابعة</p>
     </div>
+    <div class="announce" id="announce" hidden><svg class="ic"><use href="#i-bolt"/></svg><span></span></div>
     <div id="tools">
       <div class="deal-tabs" id="dealTabs">
         <button class="tab active" data-deal="all">كل العروض</button>
@@ -716,7 +725,7 @@ function cardHTML(p, i){
   return `<article class="card" style="--i:${i || 0}">
     <div class="card-media">
       ${img ? `<img src="${sized(img, 640)}" data-full="${img}" data-i="${properties.indexOf(p)}" alt="${esc(p.title)}" decoding="async" ${i ? 'loading="lazy"' : 'loading="eager" fetchpriority="high"'} onerror="imgFallback(this)">` : coverHTML(p)}
-      <div class="badges">${dk ? `<span class="badge badge-deal${rent ? ' rent' : ''}">${rent ? 'للإيجار' : 'للبيع'}</span>` : ''}${p.owner ? '<span class="badge badge-owner">من المالك</span>' : ''}</div>
+      <div class="badges">${p.featured ? '<span class="badge badge-feat">★ مميز</span>' : ''}${dk ? `<span class="badge badge-deal${rent ? ' rent' : ''}">${rent ? 'للإيجار' : 'للبيع'}</span>` : ''}${p.owner ? '<span class="badge badge-owner">من المالك</span>' : ''}</div>
       <span class="badge badge-type">${esc(typeKey(p.type) || p.type)}</span>
     </div>
     <div class="card-body">
@@ -741,7 +750,7 @@ function render(){
   const list = properties.filter(p=>{
     const d = activeDeal==="all" || (activeDeal==="owner" ? p.owner===true : dealKey(p.deal)===activeDeal);
     return d && (activeType==="الكل" || typeKey(p.type)===activeType);
-  });
+  }).sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
   grid.innerHTML = !has ? '' : list.map(cardHTML).join('') + wantHTML();
   grid.scrollLeft = 0; railUpdate();
 }
@@ -764,7 +773,7 @@ document.getElementById('railNext').addEventListener('click', () => railMove(1))
 document.getElementById('grid').addEventListener('scroll', railUpdate, {passive:true});
 window.addEventListener('resize', railUpdate);
 
-const PIXEL_ID = '', GA_ID = '', CLARITY_ID = '';   // أرقام Facebook Pixel و Google Analytics و Microsoft Clarity (سيبهم فاضيين لحد ما تجهّزهم)
+const PIXEL_ID = '', GA_ID = 'G-9NWG1J7JWZ', CLARITY_ID = '';   // أرقام Facebook Pixel و Google Analytics و Microsoft Clarity (سيبهم فاضيين لحد ما تجهّزهم)
 // زيارتك انت: افتح الموقع مرة بـ ?nt=1 عشان ماتتحسبش في الإحصاءات (و ?nt=0 لإلغاء ده)
 const NO_TRACK = (() => { try{
   const q = new URLSearchParams(location.search).get('nt');
@@ -807,18 +816,35 @@ function track(name, params){
     if(window.gtag) gtag('event', name, params || {});
   }catch(e){}
 }
+const CFG = { wa: '201114875284', tel: '01508658715' };
+function applySettings(st){
+  if(!st || typeof st !== 'object' || Array.isArray(st)) return;
+  const dg = v => String(v || '').replace(/\D/g, '');
+  const oldCfg = CFG.wa + CFG.tel;
+  if(dg(st.whatsapp)) CFG.wa = dg(st.whatsapp);
+  if(dg(st.phone)) CFG.tel = dg(st.phone);
+  document.querySelectorAll('a[href*="wa.me/"]').forEach(a => { a.href = a.href.replace(/wa\.me\/\d+/, 'wa.me/' + CFG.wa); });
+  document.querySelectorAll('a[href^="tel:"]').forEach(a => { a.href = 'tel:' + CFG.tel; });
+  document.querySelectorAll('.js-phone').forEach(el => { el.textContent = CFG.tel; });
+  if(/^https:\/\//.test(st.facebook || '')) document.querySelectorAll('a[href*="facebook.com"]').forEach(a => { a.href = st.facebook; });
+  const put = (sel, v) => { if(v){ const el = document.querySelector(sel); if(el) el.textContent = v; } };
+  put('.hero h1', st.hero_title); put('.hero .lead', st.hero_lead); put('#about .about-grid p', st.about_text);
+  const an = document.getElementById('announce');
+  if(an){ const on = !!st.announce_text && st.announce_on !== 'لا'; an.hidden = !on; if(on) an.querySelector('span').textContent = st.announce_text; }
+  if(oldCfg !== CFG.wa + CFG.tel && typeof loading !== 'undefined' && !loading) render();
+}
 function wantHTML(){
   const t = activeType !== 'الكل' ? activeType : 'عقار';
   const d = activeDeal === 'بيع' ? ' للشراء' : activeDeal === 'إيجار' ? ' للإيجار' : '';
   const msg = `عايز ${t}${d}، ممكن تساعدني؟\nالمنطقة:\nالميزانية:\n[${getSource()}]`;
-  return `<article class="card want"><div class="want-in"><span class="gi big"><svg class="ic"><use href="#i-key"/></svg></span><h3>مش لاقي اللي يناسبك؟</h3><p>قولّنا بتدوّر على إيه (النوع، المنطقة، الميزانية) ونرجعلك بأقرب الخيارات.</p><a class="btn btn-gold" target="_blank" rel="noopener" data-track="want" href="https://wa.me/201114875284?text=${encodeURIComponent(msg)}"><svg class="ic"><use href="#i-chat"/></svg>اطلب عقار بمواصفاتك</a></div></article>`;
+  return `<article class="card want"><div class="want-in"><span class="gi big"><svg class="ic"><use href="#i-key"/></svg></span><h3>مش لاقي اللي يناسبك؟</h3><p>قولّنا بتدوّر على إيه (النوع، المنطقة، الميزانية) ونرجعلك بأقرب الخيارات.</p><a class="btn btn-gold" target="_blank" rel="noopener" data-track="want" href="https://wa.me/${CFG.wa}?text=${encodeURIComponent(msg)}"><svg class="ic"><use href="#i-chat"/></svg>اطلب عقار بمواصفاتك</a></div></article>`;
 }
 function extrasHTML(p){
   const tk = typeKey(p.type), dk = dealKey(p.deal);
   const sim = properties.filter(x => x !== p && typeKey(x.type) === tk)
     .sort((a, b) => (dealKey(b.deal) === dk) - (dealKey(a.deal) === dk)).slice(0, 6);
   const rail = sim.length ? `<section class="d-sim"><h2>عقارات مشابهة</h2><div class="grid">${sim.map(cardHTML).join('')}</div></section>` : '';
-  return rail + `<div class="d-sticky"><a class="btn btn-gold" target="_blank" rel="noopener" data-track="sticky" href="${inquireHref(p)}"><svg class="ic"><use href="#i-chat"/></svg>واتساب</a><a class="btn btn-ghost" data-track="sticky" href="tel:01508658715"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a></div>`;
+  return rail + `<div class="d-sticky"><a class="btn btn-gold" target="_blank" rel="noopener" data-track="sticky" href="${inquireHref(p)}"><svg class="ic"><use href="#i-chat"/></svg>واتساب</a><a class="btn btn-ghost" data-track="sticky" href="tel:${CFG.tel}"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a></div>`;
 }
 function setDeal(d){
   activeDeal = d;
@@ -848,7 +874,7 @@ function pageUrl(p){
 }
 function inquireHref(p){
   const msg = 'عايز أستفسر عن: ' + p.title + ' - ' + p.loc + (p.price ? ' (' + p.price + ')' : '') + '\n' + pageUrl(p) + '\n[' + getSource() + ']';
-  return 'https://wa.me/201114875284?text=' + encodeURIComponent(msg);
+  return 'https://wa.me/' + CFG.wa + '?text=' + encodeURIComponent(msg);
 }
 async function shareProperty(p){
   const url = pageUrl(p);
@@ -866,7 +892,7 @@ function detailHTML(p){
   return `<div class="d-grid">
     <div class="d-gallery"><div class="d-main">${photos[0] ? '' : coverHTML(p)}${main}</div>${thumbs}</div>
     <div class="d-info">
-      <div class="d-badges">${dk ? `<span class="badge badge-deal${rent ? ' rent' : ''}">${rent ? 'للإيجار' : 'للبيع'}</span>` : ''}${p.owner?'<span class="badge badge-owner">من المالك</span>':''}<span class="badge badge-type">${esc(typeKey(p.type) || p.type)}</span></div>
+      <div class="d-badges">${p.featured ? '<span class="badge badge-feat">★ مميز</span>' : ''}${dk ? `<span class="badge badge-deal${rent ? ' rent' : ''}">${rent ? 'للإيجار' : 'للبيع'}</span>` : ''}${p.owner?'<span class="badge badge-owner">من المالك</span>':''}<span class="badge badge-type">${esc(typeKey(p.type) || p.type)}</span></div>
       <div class="price">${esc(p.price) || 'اتصل لمعرفة السعر'}</div>
       <h1>${esc(p.title)}</h1>
       <div class="card-loc"><svg class="ic"><use href="#i-pin"/></svg>${esc(p.loc)}</div>
@@ -874,7 +900,7 @@ function detailHTML(p){
       ${p.desc ? `<p class="d-desc">${esc(p.desc)}</p>` : ''}
       <div class="d-actions">
         <a class="btn btn-gold" target="_blank" rel="noopener" href="${inquireHref(p)}"><svg class="ic"><use href="#i-chat"/></svg>استفسر عن العقار ده</a>
-        <a class="btn btn-ghost" href="tel:01508658715"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a>
+        <a class="btn btn-ghost" href="tel:${CFG.tel}"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a>
         <button type="button" class="btn btn-ghost d-share" data-idx="${properties.indexOf(p)}"><svg class="ic"><use href="#i-share"/></svg>شير</button>
       </div>
     </div>
@@ -924,6 +950,7 @@ function applyListings(data){
   if(!loading && JSON.stringify(data) === JSON.stringify(properties)) return;
   properties = data; loading = false; render(); route();
 }
+try{ applySettings(JSON.parse(localStorage.getItem('zidan-settings-v1') || 'null')); }catch(e){}
 try{ applyMeta(JSON.parse(localStorage.getItem(LS_META) || 'null')); }catch(e){}
 try{ const c = JSON.parse(localStorage.getItem(LS_LIST) || 'null'); if(c && Array.isArray(c.d)) applyListings(c.d); }catch(e){}
 (window.__early || fetch(SHEET_API, {cache:'no-store'}).then(r => r.json()).catch(() => null))
@@ -934,6 +961,10 @@ try{ const c = JSON.parse(localStorage.getItem(LS_LIST) || 'null'); if(c && Arra
   .then(() => fetch(SHEET_API + '?action=meta', {cache:'no-store'}).then(r => r.json()).then(m => {
     if(applyMeta(m)){ try{ localStorage.setItem(LS_META, JSON.stringify(m)); }catch(e){} if(!loading) render(); }
   }).catch(() => {}));
+
+fetch(SHEET_API + '?action=settings', {cache:'no-store'}).then(r => r.json()).then(st => {
+  if(st && typeof st === 'object' && !Array.isArray(st)){ applySettings(st); try{ localStorage.setItem('zidan-settings-v1', JSON.stringify(st)); }catch(e){} }
+}).catch(() => {});
 
 
 document.getElementById('dealTabs').addEventListener('click', e=>{
@@ -1033,7 +1064,7 @@ document.getElementById('sellForm').addEventListener('submit', async function(e)
   if(photosFailed) lines.push("⚠️ الصور ماترفعتش على الموقع، هبعتها هنا");
   lines.push("[" + getSource() + "]");
   if(!saved) lines.push("⚠️ الطلب ماتسجّلش في الجدول");
-  const wa = 'https://wa.me/201114875284?text=' + encodeURIComponent(lines.join("\n"));
+  const wa = 'https://wa.me/' + CFG.wa + '?text=' + encodeURIComponent(lines.join("\n"));
   if (!window.open(wa, '_blank')) location.href = wa;
 });
 
@@ -1069,7 +1100,7 @@ if('serviceWorker' in navigator){
 }
 
 // Auto-update: on every visit/resume compare this build with the live one and reload if different
-const PAGE_VERSION = '20261008085500';
+const PAGE_VERSION = '20261011180319';
 function userIsBusy(){
   const a = document.activeElement;
   if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
