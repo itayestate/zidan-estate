@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="build" content="20261012115244">
+<meta name="build" content="20261012120009">
 <link rel="preconnect" href="https://script.google.com">
 <link rel="preconnect" href="https://script.googleusercontent.com">
 <script>window.__early=fetch('https://script.google.com/macros/s/AKfycbyis5BlfCDMoULUIu61vd_uQfdLz5lsWw5cAhA7sLnRYpJPWRSfRFXRqoXTAkpA2exI/exec',{cache:'no-store'}).then(function(r){return r.json()}).catch(function(){return null});</script>
@@ -815,7 +815,7 @@ function getSource(){
   if(GA_ID && !NO_TRACK){ 
     window.dataLayer = window.dataLayer || []; window.gtag = function(){ dataLayer.push(arguments); };
     const sc = document.createElement('script'); sc.async = true; sc.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID; document.head.appendChild(sc);
-    gtag('js', new Date()); gtag('config', GA_ID);
+    gtag('js', new Date()); gtag('config', GA_ID, new URLSearchParams(location.search).get('ga_debug') === '1' ? { debug_mode: true } : {});
   }
   if(CLARITY_ID && !NO_TRACK){
     (function(c,l,a,r,i,t,y){ c[a] = c[a] || function(){ (c[a].q = c[a].q || []).push(arguments); }; t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i; y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y); })(window, document, 'clarity', 'script', CLARITY_ID);
@@ -890,6 +890,7 @@ function inquireHref(p){
   return 'https://wa.me/' + CFG.wa + '?text=' + encodeURIComponent(msg);
 }
 async function shareProperty(p){
+  track('share', {id: pid(p), type: typeKey(p.type)});
   const url = pageUrl(p);
   const text = `${p.title}\n${p.loc}\n${p.price}\nZIDAN للتسويق العقاري`;
   if(navigator.share){ try{ await navigator.share({title:p.title, text, url}); }catch(_){} return; }
@@ -983,12 +984,12 @@ fetch(SHEET_API + '?action=settings', {cache:'no-store'}).then(r => r.json()).th
 document.getElementById('dealTabs').addEventListener('click', e=>{
   const b = e.target.closest('.tab'); if(!b) return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active');
-  activeDeal = b.dataset.deal; render();
+  activeDeal = b.dataset.deal; track('filter', {kind: 'deal', value: b.dataset.deal}); render();
 });
 document.getElementById('filters').addEventListener('click', e=>{
   const b = e.target.closest('.chip'); if(!b) return;
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); b.classList.add('active');
-  activeType = b.dataset.f; render();
+  activeType = b.dataset.f; track('filter', {kind: 'type', value: b.dataset.f}); render();
 });
 
 function compressImage(file, maxDim=1200, q=0.72){
@@ -1113,7 +1114,7 @@ if('serviceWorker' in navigator){
 }
 
 // Auto-update: on every visit/resume compare this build with the live one and reload if different
-const PAGE_VERSION = '20261012115244';
+const PAGE_VERSION = '20261012120009';
 function userIsBusy(){
   const a = document.activeElement;
   if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
