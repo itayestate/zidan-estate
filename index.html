@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="build" content="20261015180647">
+<meta name="build" content="20261015183444">
 <link rel="preload" as="image" href="hero.jpg" media="(min-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preload" as="image" href="hero-m.jpg" media="(max-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preconnect" href="https://script.google.com">
@@ -479,6 +479,28 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
 .query-chip{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:7px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--gold2);font-size:14px;}
 .query-chip[hidden]{display:none;}
 .query-chip button{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
+/* category pages */
+#coll{--logo-filter:invert(1) brightness(1.35);position:fixed;inset:0;z-index:39;background:var(--ink);overflow-y:auto;display:none;padding-bottom:calc(30px + env(safe-area-inset-bottom,0px));}
+:root[data-theme="light"] #coll{--logo-filter:none;}
+#coll.open{display:block;animation:up .3s ease both;}
+.coll-head h1{font-size:26px;margin:22px 0 4px;}
+.coll-head p{color:var(--muted);margin:0 0 14px;}
+.hub{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 22px;}
+.hub[hidden]{display:none;}
+.hub-big{display:flex;align-items:center;gap:14px;padding:18px;border-radius:18px;color:#1a1300;text-decoration:none;min-height:96px;transition:transform .2s;}
+.hub-big:hover{transform:translateY(-3px);}
+.hub-big.sale{background:var(--btn);}
+.hub-big.rent{background:linear-gradient(135deg,#6cc3cd,#3b8f9c);color:#06222a;}
+.hub-big strong{display:block;font-family:'Cairo',system-ui,sans-serif;font-size:22px;line-height:1.2;}
+.hub-big small{display:block;font-size:14px;opacity:.85;}
+.hub-big .gi{background:rgba(255,255,255,.35);border-color:rgba(255,255,255,.5);color:inherit;}
+.hub-chips{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;}
+.hub-chip{padding:8px 16px;border-radius:999px;border:1px solid var(--glass-line);background:var(--glass);color:var(--paper);text-decoration:none;font-size:14px;}
+.hub-chip:hover{border-color:var(--gold2);}
+@media(max-width:560px){.hub-big{padding:14px;min-height:84px;}.hub-big strong{font-size:19px;}}
+.latest-head{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 12px;}
+.latest-head h3{margin:0;font-size:19px;}
+.more-link{color:var(--gold);font-weight:700;text-decoration:none;font-size:14px;}
 </style>
 </head>
 <body>
@@ -514,7 +536,8 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
   <div class="wrap headrow">
     <div class="brand" role="button" tabindex="0" aria-label="ZIDAN" id="brandLogo"><img class="brand-logo" alt="ZIDAN" src="data:image/png;base64,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"></div>
     <nav>
-      <a href="#listings">العقارات</a>
+      <a href="?c=sale" data-coll="sale">للبيع</a>
+      <a href="?c=rent" data-coll="rent">للإيجار</a>
       <a href="#about">من نحن</a>
       <a href="#contact">تواصل معنا</a>
       <a href="#sell" class="nav-cta"><svg class="ic"><use href="#i-plus"/></svg>أضف عقارك</a>
@@ -568,15 +591,8 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
     </div>
     <div class="announce" id="announce" hidden><svg class="ic"><use href="#i-bolt"/></svg><span></span></div>
     <div id="tools">
-      <div class="deal-tabs" id="dealTabs">
-        <button class="tab active" data-deal="all">كل العروض</button>
-        <button class="tab" data-deal="بيع">للبيع</button>
-        <button class="tab" data-deal="إيجار">للإيجار</button>
-        <button class="tab" data-deal="owner">عرض من المالك</button>
-      </div>
-      <div class="filters" id="filters"></div>
-      <div class="query-chip" id="queryChip" hidden><span></span><button type="button" id="queryClear" aria-label="مسح البحث">×</button></div>
-      <div class="toolbar" id="toolbar"><button type="button" class="view-btn" id="viewBtn"></button></div>
+      <div class="hub" id="hub"></div>
+      <div class="latest-head"><h3>أحدث العقارات</h3><a href="?c=all" class="more-link" data-coll="all">عرض الكل ←</a></div>
     </div>
     <div class="rail">
       <button type="button" class="rail-btn" id="railPrev" aria-label="السابق"><svg class="ic"><use href="#i-back"/></svg></button>
@@ -684,6 +700,19 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
   <button type="button" class="btn btn-gold" id="updateBtn">تحديث</button>
 </div>
 
+<div id="coll" role="dialog" aria-modal="true" aria-label="العقارات">
+  <div class="d-top"><div class="wrap">
+    <button type="button" class="btn btn-ghost c-back"><svg class="ic"><use href="#i-back"/></svg>الرئيسية</button>
+    <img id="cLogo" class="brand-logo" alt="ZIDAN">
+  </div></div>
+  <div class="wrap">
+    <div class="coll-head"><h1 id="cTitle"></h1><p id="cCount"></p></div>
+    <div class="query-chip" id="cQuery" hidden><span></span><button type="button" id="cQueryClear" aria-label="مسح البحث">×</button></div>
+    <div class="filters" id="cChips"></div>
+    <div class="rail grid-view"><div class="grid" id="cGrid"></div></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><svg class="ic"><use href="#i-clock"/></svg><span>تم حفظ طلبك، جاري المراجعة</span></div>
 
 <footer>
@@ -724,16 +753,6 @@ function dealKey(raw){
   if(n.includes('بيع')) return 'بيع';
   if(n.includes('يجار')) return 'إيجار';
   return '';
-}
-function renderFilters(){
-  const box = document.getElementById('filters');
-  const base = properties.filter(p => (activeDeal==='all' || (activeDeal==='owner' ? p.owner===true : dealKey(p.deal)===activeDeal)) && matchQuery(p) && matchArea(p));
-  const counts = {}; base.forEach(p => { const k = typeKey(p.type); if(k) counts[k] = (counts[k] || 0) + 1; });
-  const order = categories.map(c => c.value); Object.keys(counts).forEach(k => { if(!order.includes(k)) order.push(k); });
-  const label = k => (categories.find(c => c.value === k) || {}).label || k;
-  if(activeType !== 'الكل' && !counts[activeType]) activeType = 'الكل';
-  box.innerHTML = `<button class="chip${activeType==='الكل' ? ' active' : ''}" data-f="الكل">الكل (${base.length})</button>` +
-    order.filter(k => counts[k]).map(k => `<button class="chip${activeType===k ? ' active' : ''}" data-f="${esc(k)}">${esc(label(k))} (${counts[k]})</button>`).join('');
 }
 function fillTypeSelect(){
   const sel = document.getElementById('s-type'), cur = sel.value;
@@ -836,11 +855,8 @@ function updateLive(){
   liveIdx = 0; show(0); clearInterval(liveTimer);
   if(parts.length > 1) liveTimer = setInterval(() => { el.style.opacity = 0; setTimeout(() => { liveIdx++; show(liveIdx); el.style.opacity = 1; }, 250); }, 4000);
 }
-let query = '', activeArea = '', sortMode = 'new', viewMode = 'rail';
-try{ viewMode = localStorage.getItem('zidan-view') === 'grid' ? 'grid' : 'rail'; }catch(e){}
-const areaKey = p => norm(p.loc);
-function matchQuery(p){ if(!query) return true; return norm([p.title, p.loc, p.desc, p.type, p.price].join(' ')).includes(norm(query)); }
-function matchArea(p){ return !activeArea || areaKey(p) === activeArea; }
+let sortMode = 'new';
+let currentColl = '', currentCollType = 'الكل', currentCollQ = '', hubSig = '';
 function priceNum(v){
   const t = String(v || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٬,،\s]/g, '');
   const m = t.match(/\d+(?:\.\d+)?/); if(!m) return NaN;
@@ -855,17 +871,7 @@ function applyOrder(list){
   return arr.sort((a, b) => { const x = priceNum(a.price), y = priceNum(b.price);
     if(isNaN(x) && isNaN(y)) return 0; if(isNaN(x)) return 1; if(isNaN(y)) return -1; return (x - y) * dir; });
 }
-function applyViewMode(){
-  const rail = document.querySelector('.rail'), b = document.getElementById('viewBtn'); if(!rail || !b) return;
-  rail.classList.toggle('grid-view', viewMode === 'grid');
-  b.innerHTML = viewMode === 'grid' ? '<svg class="ic"><use href="#i-rail"/></svg>عرض صف' : '<svg class="ic"><use href="#i-grid"/></svg>عرض شبكة';
-}
 (function(){
-  document.getElementById('viewBtn').addEventListener('click', () => { viewMode = viewMode === 'grid' ? 'rail' : 'grid'; try{ localStorage.setItem('zidan-view', viewMode); }catch(e){} applyViewMode(); track('filter', {kind: 'view', value: viewMode}); });
-  applyViewMode();
-  document.getElementById('queryClear').addEventListener('click', () => { query = ''; render(); });
-
-  // ---- search from the header magnifier ----
   const toggle = document.getElementById('searchToggle'), panel = document.getElementById('searchPanel'), inp = document.getElementById('sInput'), res = document.getElementById('sResults');
   const close = () => { panel.hidden = true; toggle.setAttribute('aria-expanded', 'false'); };
   const open = () => { panel.hidden = false; toggle.setAttribute('aria-expanded', 'true'); inp.value = ''; show(''); setTimeout(() => inp.focus(), 30); track('search_open'); };
@@ -879,7 +885,7 @@ function applyViewMode(){
     const nq = norm(q), hits = properties.filter(p => norm([p.title, p.loc, p.desc, p.type, p.price].join(' ')).includes(nq));
     if(!hits.length){ res.innerHTML = '<div class="s-hint">مفيش نتايج. جرّب كلمة تانية.</div>'; return; }
     res.innerHTML = hits.slice(0, 6).map(p => '<a class="s-item" href="?p=' + encodeURIComponent(pid(p)) + '" data-id="' + esc(pid(p)) + '"><b>' + esc(p.title || p.loc) + '</b><span>' + esc(typeKey(p.type) || p.type) + ' · ' + esc(p.loc) + (p.price ? ' · ' + esc(p.price) : '') + '</span></a>').join('')
-      + '<button type="button" class="s-all" data-q="' + esc(q) + '">' + (hits.length > 6 ? 'عرض كل النتائج (' + hits.length + ')' : 'عرض النتائج في القايمة') + '</button>';
+      + '<button type="button" class="s-all" data-q="' + esc(q) + '">' + (hits.length > 6 ? 'عرض كل النتائج (' + hits.length + ')' : 'عرض النتائج في صفحة') + '</button>';
   }
   toggle.addEventListener('click', () => panel.hidden ? open() : close());
   document.getElementById('sClose').addEventListener('click', close);
@@ -889,23 +895,31 @@ function applyViewMode(){
   res.addEventListener('click', e => {
     const sug = e.target.closest('.s-sug'); if(sug){ inp.value = sug.dataset.q; show(sug.dataset.q); return; }
     const item = e.target.closest('.s-item'); if(item){ e.preventDefault(); close(); go(item.dataset.id); return; }
-    const all = e.target.closest('.s-all'); if(all){ query = all.dataset.q; activeType = 'الكل'; setDeal('all'); close(); track('search', {value: query}); document.getElementById('listings').scrollIntoView({behavior: 'smooth'}); }
+    const all = e.target.closest('.s-all'); if(all){ close(); track('search', {value: all.dataset.q}); openColl('all', 'الكل', all.dataset.q); }
   });
 })();
+function renderHub(){
+  const box = document.getElementById('hub'); if(!box) return;
+  const sale = properties.filter(p => dealKey(p.deal) === 'بيع').length, rent = properties.filter(p => dealKey(p.deal) === 'إيجار').length, owner = properties.filter(p => p.owner === true).length;
+  const types = {}; properties.forEach(p => { const k = typeKey(p.type); if(k) types[k] = (types[k] || 0) + 1; });
+  const sig = [sale, rent, owner, JSON.stringify(types)].join('|'); if(sig === hubSig) return; hubSig = sig;
+  const label = k => (categories.find(c => c.value === k) || {}).label || k;
+  box.innerHTML = '<a class="hub-big sale" href="?c=sale" data-coll="sale"><span class="gi"><svg class="ic"><use href="#i-tag"/></svg></span><span><strong>للبيع</strong><small>' + sale + ' عقار</small></span></a>'
+    + '<a class="hub-big rent" href="?c=rent" data-coll="rent"><span class="gi"><svg class="ic"><use href="#i-key"/></svg></span><span><strong>للإيجار</strong><small>' + rent + ' عقار</small></span></a>'
+    + '<div class="hub-chips">' + (owner ? '<a class="hub-chip" href="?c=owner" data-coll="owner">من المالك (' + owner + ')</a>' : '')
+    + Object.keys(types).map(k => '<a class="hub-chip" href="?c=all&t=' + encodeURIComponent(k) + '" data-coll="all" data-t="' + esc(k) + '">' + esc(label(k)) + ' (' + types[k] + ')</a>').join('') + '</div>';
+}
 function render(){
   const has = properties.length > 0;
   updateLive();
   empty.style.display = (!loading && !has) ? '' : 'none';
   tools.style.display = has ? '' : 'none';
   if(loading){ grid.innerHTML = skelCard.repeat(3); return; }
-  renderFilters();
-  const qc = document.getElementById('queryChip'); if(qc){ qc.hidden = !query; if(query) qc.querySelector('span').textContent = '🔎 ' + query; }
-  const list = applyOrder(properties.filter(p=>{
-    const d = activeDeal==="all" || (activeDeal==="owner" ? p.owner===true : dealKey(p.deal)===activeDeal);
-    return d && (activeType==="الكل" || typeKey(p.type)===activeType) && matchQuery(p) && matchArea(p);
-  }));
-  grid.innerHTML = !has ? '' : list.map(cardHTML).join('') + wantHTML();
+  renderHub();
+  grid.innerHTML = !has ? '' : applyOrder(properties).slice(0, 12).map(cardHTML).join('')
+    + '<article class="card want"><div class="want-in"><span class="gi big"><svg class="ic"><use href="#i-grid"/></svg></span><h3>شوف كل العقارات</h3><p>' + properties.length + ' عقار متاح</p><a class="btn btn-gold" href="?c=all" data-coll="all">عرض الكل</a></div></article>';
   grid.scrollLeft = 0; railUpdate();
+  if(currentColl) renderColl();
 }
 render();
 
@@ -1001,9 +1015,10 @@ function applySettings(st){
   if(an){ const on = !!st.announce_text && st.announce_on !== 'لا'; an.hidden = !on; if(on) an.querySelector('span').textContent = st.announce_text; }
   if(oldCfg !== CFG.wa + CFG.tel && typeof loading !== 'undefined' && !loading) render();
 }
-function wantHTML(){
-  const t = activeType !== 'الكل' ? activeType : 'عقار';
-  const d = activeDeal === 'بيع' ? ' للشراء' : activeDeal === 'إيجار' ? ' للإيجار' : '';
+function wantHTML(tt, dd){
+  const T = tt === undefined ? 'الكل' : tt, D = dd === undefined ? 'all' : dd;
+  const t = T !== 'الكل' ? T : 'عقار';
+  const d = D === 'بيع' ? ' للشراء' : D === 'إيجار' ? ' للإيجار' : '';
   const msg = `عايز ${t}${d}، ممكن تساعدني؟\nالمنطقة:\nالميزانية:\n[${getSource()}]`;
   return `<article class="card want"><div class="want-in"><span class="gi big"><svg class="ic"><use href="#i-key"/></svg></span><h3>مش لاقي اللي يناسبك؟</h3><p>قولّنا بتدوّر على إيه (النوع، المنطقة، الميزانية) ونرجعلك بأقرب الخيارات.</p><a class="btn btn-gold" target="_blank" rel="noopener" data-track="want" href="https://wa.me/${CFG.wa}?text=${encodeURIComponent(msg)}"><svg class="ic"><use href="#i-chat"/></svg>اطلب عقار بمواصفاتك</a></div></article>`;
 }
@@ -1014,16 +1029,10 @@ function extrasHTML(p){
   const rail = sim.length ? `<section class="d-sim"><h2>عقارات مشابهة</h2><div class="grid">${sim.map(cardHTML).join('')}</div></section>` : '';
   return rail + `<div class="d-sticky"><a class="btn btn-gold" target="_blank" rel="noopener" data-track="sticky" href="${inquireHref(p)}"><svg class="ic"><use href="#i-chat"/></svg>واتساب</a><a class="btn btn-ghost" data-track="sticky" href="tel:${CFG.tel}"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a></div>`;
 }
-function setDeal(d){
-  activeDeal = d;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.deal === d));
-  render();
-}
 document.querySelectorAll('.intent-card').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.intent; track('intent', {choice: k});
   if(k === 'sell'){ document.getElementById('sell').scrollIntoView({behavior:'smooth'}); return; }
-  setDeal(k === 'buy' ? 'بيع' : 'إيجار');
-  document.getElementById('listings').scrollIntoView({behavior:'smooth'});
+  openColl(k === 'buy' ? 'sale' : 'rent');
 }));
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href]'); if(!a) return;
@@ -1079,10 +1088,58 @@ const notFoundHTML = '<div class="empty glass-card" style="margin:40px auto;max-
 
 const detailEl = document.getElementById('detail');
 document.getElementById('dLogo').src = document.querySelector('header .brand-logo').src;
-let currentId = new URLSearchParams(location.search).get('p');
+let currentId = null;
+function readUrl(){ const q = new URLSearchParams(location.search); currentId = q.get('p'); currentColl = q.get('c') || ''; currentCollType = q.get('t') || 'الكل'; currentCollQ = q.get('q') || ''; }
+readUrl();
+const collEl = document.getElementById('coll');
+document.getElementById('cLogo').src = document.querySelector('header .brand-logo').src;
+const COLL_TITLES = { sale: 'عقارات للبيع', rent: 'عقارات للإيجار', owner: 'عروض مباشرة من المالك', all: 'كل العقارات' };
+const collLabel = k => (categories.find(c => c.value === k) || {}).label || k;
+function collTitle(){ return (COLL_TITLES[currentColl] || 'العقارات') + (currentCollType !== 'الكل' ? ' · ' + collLabel(currentCollType) : ''); }
+function collUrl(){ const q = new URLSearchParams(); q.set('c', currentColl); if(currentCollType !== 'الكل') q.set('t', currentCollType); if(currentCollQ) q.set('q', currentCollQ); return location.pathname + '?' + q.toString(); }
+function collItems(){
+  const nq = currentCollQ ? norm(currentCollQ) : '';
+  return properties.filter(p => {
+    const d = currentColl === 'sale' ? dealKey(p.deal) === 'بيع' : currentColl === 'rent' ? dealKey(p.deal) === 'إيجار' : currentColl === 'owner' ? p.owner === true : true;
+    return d && (!nq || norm([p.title, p.loc, p.desc, p.type, p.price].join(' ')).includes(nq));
+  });
+}
+function renderColl(){
+  if(!collEl) return;
+  if(!currentColl){ collEl.classList.remove('open'); return; }
+  const wasOpen = collEl.classList.contains('open'); collEl.classList.add('open'); if(!wasOpen) collEl.scrollTop = 0;
+  const g = document.getElementById('cGrid');
+  if(loading){ document.getElementById('cTitle').textContent = COLL_TITLES[currentColl] || 'العقارات'; g.innerHTML = skelCard.repeat(4); return; }
+  const base = collItems(), counts = {};
+  base.forEach(p => { const k = typeKey(p.type); if(k) counts[k] = (counts[k] || 0) + 1; });
+  if(currentCollType !== 'الكل' && !counts[currentCollType]) currentCollType = 'الكل';
+  const list = applyOrder(base.filter(p => currentCollType === 'الكل' || typeKey(p.type) === currentCollType));
+  document.getElementById('cTitle').textContent = collTitle();
+  document.getElementById('cCount').textContent = list.length + ' عقار';
+  const order = categories.map(c => c.value); Object.keys(counts).forEach(k => { if(!order.includes(k)) order.push(k); });
+  document.getElementById('cChips').innerHTML = Object.keys(counts).length > 1 ? '<button class="chip' + (currentCollType === 'الكل' ? ' active' : '') + '" data-t="الكل">الكل (' + base.length + ')</button>' + order.filter(k => counts[k]).map(k => '<button class="chip' + (currentCollType === k ? ' active' : '') + '" data-t="' + esc(k) + '">' + esc(collLabel(k)) + ' (' + counts[k] + ')</button>').join('') : '';
+  const qc = document.getElementById('cQuery'); qc.hidden = !currentCollQ; if(currentCollQ) qc.querySelector('span').textContent = '🔎 ' + currentCollQ;
+  g.innerHTML = list.map(cardHTML).join('') + wantHTML(currentCollType, currentColl === 'sale' ? 'بيع' : currentColl === 'rent' ? 'إيجار' : 'all');
+  document.title = collTitle() + ' | ZIDAN';
+}
+function openColl(c, t, q){
+  currentColl = c; currentCollType = t || 'الكل'; currentCollQ = q || ''; currentId = null;
+  try{ history.pushState({d:1}, '', collUrl()); }catch(e){}
+  track('collection', {c, t: currentCollType}); route();
+}
+function closeColl(){
+  if(history.state && history.state.d) history.back();
+  else { currentColl = ''; try{ history.pushState({d:1}, '', location.pathname); }catch(e){} route(); }
+}
+document.getElementById('cChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if(!b) return; currentCollType = b.dataset.t;
+  try{ history.replaceState({d:1}, '', collUrl()); }catch(err){} renderColl(); track('filter', {kind: 'type', value: currentCollType});
+});
+document.getElementById('cQueryClear').addEventListener('click', () => { currentCollQ = ''; try{ history.replaceState({d:1}, '', collUrl()); }catch(err){} renderColl(); });
 function route(){
+  renderColl();
   const body = detailEl.querySelector('.d-body');
-  if(!currentId){ detailEl.classList.remove('open'); document.body.classList.remove('lock'); document.title = BASE_TITLE; return; }
+  if(!currentId){ detailEl.classList.remove('open'); document.body.classList.toggle('lock', !!currentColl); document.title = currentColl ? collTitle() + ' | ZIDAN' : BASE_TITLE; return; }
   detailEl.classList.add('open'); document.body.classList.add('lock'); detailEl.scrollTop = 0;
   if(loading){ body.innerHTML = '<div class="d-grid"><div class="d-gallery"><div class="d-main skel-block"></div></div><div class="d-info"><div class="sk-bar" style="width:35%"></div><div class="sk-bar big" style="width:80%"></div><div class="sk-bar" style="width:50%"></div><div class="sk-bar" style="width:65%"></div><div class="sk-bar" style="height:44px;width:60%"></div></div></div>'; return; }
   const p = properties.find(x => pid(x) === currentId);
@@ -1092,13 +1149,15 @@ function route(){
 }
 function go(id){
   currentId = id;
-  try{ history.pushState({d:1}, '', id ? location.pathname + '?p=' + encodeURIComponent(id) : location.pathname); }catch(e){}
+  try{ history.pushState({d:1}, '', id ? location.pathname + '?p=' + encodeURIComponent(id) : (currentColl ? collUrl() : location.pathname)); }catch(e){}
   route();
 }
 function closeDetail(){ if(history.state && history.state.d) history.back(); else go(null); }
-window.addEventListener('popstate', () => { currentId = new URLSearchParams(location.search).get('p'); route(); });
-document.addEventListener('keydown', e => { if(e.key === 'Escape' && currentId) closeDetail(); });
+window.addEventListener('popstate', () => { readUrl(); route(); });
+document.addEventListener('keydown', e => { if(e.key !== 'Escape' || !document.getElementById('searchPanel').hidden) return; if(currentId) closeDetail(); else if(currentColl) closeColl(); });
 document.addEventListener('click', e => {
+  const cl = e.target.closest('[data-coll]'); if(cl){ e.preventDefault(); openColl(cl.dataset.coll, cl.dataset.t || 'الكل'); return; }
+  if(e.target.closest('.c-back')){ e.preventDefault(); closeColl(); return; }
   const sh = e.target.closest('.card-share, .d-share');
   if(sh){ const p = properties[+sh.dataset.idx]; if(p) shareProperty(p); return; }
   const lk = e.target.closest('.card-link');
@@ -1136,16 +1195,6 @@ fetch(SHEET_API + '?action=settings', {cache:'no-store'}).then(r => r.json()).th
 }).catch(() => {});
 
 
-document.getElementById('dealTabs').addEventListener('click', e=>{
-  const b = e.target.closest('.tab'); if(!b) return;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active');
-  activeDeal = b.dataset.deal; track('filter', {kind: 'deal', value: b.dataset.deal}); render();
-});
-document.getElementById('filters').addEventListener('click', e=>{
-  const b = e.target.closest('.chip'); if(!b) return;
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); b.classList.add('active');
-  activeType = b.dataset.f; track('filter', {kind: 'type', value: b.dataset.f}); render();
-});
 
 function compressImage(file, maxDim=1200, q=0.72){
   return new Promise(resolve=>{
@@ -1269,7 +1318,7 @@ if('serviceWorker' in navigator){
 }
 
 // Auto-update: on every visit/resume compare this build with the live one and reload if different
-const PAGE_VERSION = '20261015180647';
+const PAGE_VERSION = '20261015183444';
 function userIsBusy(){
   const a = document.activeElement;
   if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
