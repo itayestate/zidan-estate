@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="build" content="20261015100416">
+<meta name="build" content="20261015101350">
 <link rel="preload" as="image" href="hero.jpg" media="(min-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preload" as="image" href="hero-m.jpg" media="(max-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preconnect" href="https://script.google.com">
@@ -432,6 +432,17 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
 @media (prefers-reduced-motion:reduce){html.js .hero h1{visibility:visible;}}
 .hero h1.typing::after{content:"";display:inline-block;width:3px;height:.85em;margin-inline-start:6px;background:var(--gold2);vertical-align:-.08em;animation:caret 1s steps(1) infinite;}
 @keyframes caret{50%{opacity:0;}}
+/* search / sort / view */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 20px;}
+.toolbar input,.toolbar select{font:inherit;font-size:16px;padding:10px 14px;border-radius:12px;border:1px solid var(--glass-line);background:var(--panel);color:var(--paper);min-width:0;}
+.toolbar #q{flex:1 1 220px;-webkit-appearance:none;appearance:none;}
+.toolbar select{flex:1 1 140px;-webkit-appearance:none;appearance:none;padding-left:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23c9a24b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 12px center;}
+.toolbar select[hidden]{display:none;}
+.view-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:12px;border:1px solid var(--glass-line);background:var(--glass);color:var(--paper);font:inherit;font-size:14px;cursor:pointer;}
+.view-btn .ic{width:18px;height:18px;color:var(--gold);}
+.rail.grid-view .rail-btn{display:none!important;}
+.rail.grid-view .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));overflow:visible;scroll-snap-type:none;padding-bottom:8px;}
+.rail.grid-view .grid>.card{flex:initial;}
 </style>
 </head>
 <body>
@@ -457,6 +468,8 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
 <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 20h14"/></symbol>
 <symbol id="i-ishare" viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4M7 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
+<symbol id="i-rail" viewBox="0 0 24 24"><path d="M3 7h6v10H3zM11 7h6v10h-6zM19 7h2v10h-2z"/></symbol>
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
 </defs></svg>
 
@@ -520,6 +533,12 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
         <button class="tab" data-deal="owner">عرض من المالك</button>
       </div>
       <div class="filters" id="filters"></div>
+      <div class="toolbar" id="toolbar">
+        <input type="search" id="q" placeholder="ابحث بالمنطقة أو الكلمة..." aria-label="بحث" autocomplete="off">
+        <select id="areaSel" aria-label="المنطقة" hidden><option value="">كل المناطق</option></select>
+        <select id="sortSel" aria-label="الترتيب"><option value="new">الأحدث</option><option value="low">الأقل سعراً</option><option value="high">الأعلى سعراً</option></select>
+        <button type="button" class="view-btn" id="viewBtn"></button>
+      </div>
     </div>
     <div class="rail">
       <button type="button" class="rail-btn" id="railPrev" aria-label="السابق"><svg class="ic"><use href="#i-back"/></svg></button>
@@ -670,7 +689,7 @@ function dealKey(raw){
 }
 function renderFilters(){
   const box = document.getElementById('filters');
-  const base = properties.filter(p => activeDeal==='all' || (activeDeal==='owner' ? p.owner===true : dealKey(p.deal)===activeDeal));
+  const base = properties.filter(p => (activeDeal==='all' || (activeDeal==='owner' ? p.owner===true : dealKey(p.deal)===activeDeal)) && matchQuery(p) && matchArea(p));
   const counts = {}; base.forEach(p => { const k = typeKey(p.type); if(k) counts[k] = (counts[k] || 0) + 1; });
   const order = categories.map(c => c.value); Object.keys(counts).forEach(k => { if(!order.includes(k)) order.push(k); });
   const label = k => (categories.find(c => c.value === k) || {}).label || k;
@@ -779,17 +798,61 @@ function updateLive(){
   liveIdx = 0; show(0); clearInterval(liveTimer);
   if(parts.length > 1) liveTimer = setInterval(() => { el.style.opacity = 0; setTimeout(() => { liveIdx++; show(liveIdx); el.style.opacity = 1; }, 250); }, 4000);
 }
+let query = '', activeArea = '', sortMode = 'new', viewMode = 'rail';
+try{ viewMode = localStorage.getItem('zidan-view') === 'grid' ? 'grid' : 'rail'; }catch(e){}
+const areaKey = p => norm(p.loc);
+function matchQuery(p){ if(!query) return true; return norm([p.title, p.loc, p.desc, p.type, p.price].join(' ')).includes(norm(query)); }
+function matchArea(p){ return !activeArea || areaKey(p) === activeArea; }
+function priceNum(v){
+  const t = String(v || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٬,،\s]/g, '');
+  const m = t.match(/\d+(?:\.\d+)?/); if(!m) return NaN;
+  let n = parseFloat(m[0]);
+  if(/مليون/.test(t)) n *= 1e6; else if(/[أا]لف/.test(t)) n *= 1e3;
+  return n;
+}
+function applyOrder(list){
+  const arr = list.slice();
+  if(sortMode === 'new'){ arr.reverse(); return arr.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); }
+  const dir = sortMode === 'low' ? 1 : -1;
+  return arr.sort((a, b) => { const x = priceNum(a.price), y = priceNum(b.price);
+    if(isNaN(x) && isNaN(y)) return 0; if(isNaN(x)) return 1; if(isNaN(y)) return -1; return (x - y) * dir; });
+}
+function renderAreas(){
+  const sel = document.getElementById('areaSel'); if(!sel) return;
+  const base = properties.filter(p => (activeDeal === 'all' || (activeDeal === 'owner' ? p.owner === true : dealKey(p.deal) === activeDeal)) && (activeType === 'الكل' || typeKey(p.type) === activeType) && matchQuery(p));
+  const groups = {};
+  base.forEach(p => { const k = areaKey(p); if(!k) return; (groups[k] = groups[k] || { n: 0, names: {} }).n++; groups[k].names[p.loc.trim()] = (groups[k].names[p.loc.trim()] || 0) + 1; });
+  const keys = Object.keys(groups).sort((a, b) => groups[b].n - groups[a].n);
+  if(activeArea && !groups[activeArea]) activeArea = '';
+  const label = k => { const best = Object.keys(groups[k].names).sort((a, b) => groups[k].names[b] - groups[k].names[a])[0]; return (best.length > 26 ? best.slice(0, 25) + '…' : best) + ' (' + groups[k].n + ')'; };
+  sel.hidden = keys.length < 2 && !activeArea;
+  sel.innerHTML = '<option value="">كل المناطق</option>' + keys.map(k => '<option value="' + esc(k) + '">' + esc(label(k)) + '</option>').join('');
+  sel.value = activeArea;
+}
+function applyViewMode(){
+  const rail = document.querySelector('.rail'), b = document.getElementById('viewBtn'); if(!rail || !b) return;
+  rail.classList.toggle('grid-view', viewMode === 'grid');
+  b.innerHTML = viewMode === 'grid' ? '<svg class="ic"><use href="#i-rail"/></svg>عرض صف' : '<svg class="ic"><use href="#i-grid"/></svg>عرض شبكة';
+}
+(function(){
+  const q = document.getElementById('q'); if(!q) return; let t;
+  q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { query = q.value.trim(); render(); }, 150); });
+  document.getElementById('areaSel').addEventListener('change', e => { activeArea = e.target.value; track('filter', {kind: 'area', value: e.target.selectedOptions[0].textContent}); render(); });
+  document.getElementById('sortSel').addEventListener('change', e => { sortMode = e.target.value; track('filter', {kind: 'sort', value: sortMode}); render(); });
+  document.getElementById('viewBtn').addEventListener('click', () => { viewMode = viewMode === 'grid' ? 'rail' : 'grid'; try{ localStorage.setItem('zidan-view', viewMode); }catch(e){} applyViewMode(); track('filter', {kind: 'view', value: viewMode}); });
+  applyViewMode();
+})();
 function render(){
   const has = properties.length > 0;
   updateLive();
   empty.style.display = (!loading && !has) ? '' : 'none';
   tools.style.display = has ? '' : 'none';
   if(loading){ grid.innerHTML = skelCard.repeat(3); return; }
-  renderFilters();
-  const list = properties.filter(p=>{
+  renderFilters(); renderAreas();
+  const list = applyOrder(properties.filter(p=>{
     const d = activeDeal==="all" || (activeDeal==="owner" ? p.owner===true : dealKey(p.deal)===activeDeal);
-    return d && (activeType==="الكل" || typeKey(p.type)===activeType);
-  }).sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    return d && (activeType==="الكل" || typeKey(p.type)===activeType) && matchQuery(p) && matchArea(p);
+  }));
   grid.innerHTML = !has ? '' : list.map(cardHTML).join('') + wantHTML();
   grid.scrollLeft = 0; railUpdate();
 }
@@ -917,6 +980,7 @@ document.addEventListener('click', e => {
   if(h.startsWith('https://wa.me') && !h.includes('?text=')) a.href = h + '?text=' + encodeURIComponent('أهلاً، جاي من موقع ZIDAN [' + getSource() + ']');
   if(h.startsWith('https://wa.me')) track(a.dataset.track === 'want' ? 'want' : 'whatsapp', {where: a.dataset.track || 'link'});
   else if(h.startsWith('tel:')) track('call', {where: a.dataset.track || 'link'});
+  else if(h.includes('google.com/maps')) track('map', {where: a.dataset.track || 'link'});
 });
 
 const BASE_TITLE = document.title;
@@ -956,6 +1020,7 @@ function detailHTML(p){
       <div class="d-actions">
         <a class="btn btn-gold" target="_blank" rel="noopener" href="${inquireHref(p)}"><svg class="ic"><use href="#i-chat"/></svg>استفسر عن العقار ده</a>
         <a class="btn btn-ghost" href="tel:${CFG.tel}"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a>
+        <a class="btn btn-ghost" target="_blank" rel="noopener" data-track="map" href="${/^https:\/\//.test(p.map || '') ? esc(p.map) : 'https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent((p.loc || '') + ' إيتاي البارود')}"><svg class="ic"><use href="#i-pin"/></svg>الخريطة</a>
         <button type="button" class="btn btn-ghost d-share" data-idx="${properties.indexOf(p)}"><svg class="ic"><use href="#i-share"/></svg>شير</button>
       </div>
     </div>
@@ -1155,7 +1220,7 @@ if('serviceWorker' in navigator){
 }
 
 // Auto-update: on every visit/resume compare this build with the live one and reload if different
-const PAGE_VERSION = '20261015100416';
+const PAGE_VERSION = '20261015101350';
 function userIsBusy(){
   const a = document.activeElement;
   if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
