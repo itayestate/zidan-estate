@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="build" content="20261015102141">
+<meta name="build" content="20261015180647">
 <link rel="preload" as="image" href="hero.jpg" media="(min-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preload" as="image" href="hero-m.jpg" media="(max-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preconnect" href="https://script.google.com">
@@ -461,6 +461,24 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
   .rail.grid-view .card-actions{padding-top:8px;}
   .rail.grid-view .card-inquire{font-size:12px;padding:9px 6px;min-height:40px;}
 }
+/* header search */
+.search-toggle:hover{transform:none;}
+.search-panel{position:absolute;top:100%;left:0;right:0;background:var(--panel);color:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 18px 40px -20px rgba(0,0,0,.6);padding:12px 0 14px;max-height:70vh;overflow:auto;}
+.search-panel[hidden]{display:none;}
+.s-bar{display:flex;align-items:center;gap:10px;padding:2px 14px;border:1px solid var(--glass-line);border-radius:14px;background:var(--ink);}
+.s-bar .ic{color:var(--gold);}
+.s-bar input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--paper);font:inherit;font-size:16px;padding:11px 0;-webkit-appearance:none;appearance:none;}
+.s-bar button{background:none;border:0;color:var(--muted);font-size:26px;cursor:pointer;line-height:1;}
+.s-hint{color:var(--muted);font-size:14px;margin:12px 2px 6px;}
+.s-sugs{display:flex;gap:8px;flex-wrap:wrap;}
+.s-sug{border:1px solid var(--glass-line);background:var(--glass);color:var(--paper);border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer;}
+.s-item{display:block;padding:10px 4px;border-bottom:1px solid var(--line);color:var(--paper);text-decoration:none;}
+.s-item b{display:block;font-size:15px;}
+.s-item span{color:var(--muted);font-size:13px;}
+.s-all{width:100%;margin-top:10px;padding:11px;border-radius:12px;border:0;background:var(--btn);color:#1a1300;font:inherit;font-weight:700;cursor:pointer;}
+.query-chip{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:7px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--gold2);font-size:14px;}
+.query-chip[hidden]{display:none;}
+.query-chip button{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
 </style>
 </head>
 <body>
@@ -488,6 +506,7 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
 <symbol id="i-ishare" viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4M7 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></symbol>
 <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
 <symbol id="i-rail" viewBox="0 0 24 24"><path d="M3 7h6v10H3zM11 7h6v10h-6zM19 7h2v10h-2z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
 </defs></svg>
 
@@ -500,10 +519,15 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
       <a href="#contact">تواصل معنا</a>
       <a href="#sell" class="nav-cta"><svg class="ic"><use href="#i-plus"/></svg>أضف عقارك</a>
     </nav>
+    <button class="theme-toggle search-toggle" id="searchToggle" aria-label="بحث" aria-expanded="false"><svg class="ic"><use href="#i-search"/></svg></button>
     <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع الليلي والنهاري">
       <svg class="ic i-sun"><use href="#i-sun"/></svg><svg class="ic i-moon"><use href="#i-moon"/></svg>
     </button>
   </div>
+  <div class="search-panel" id="searchPanel" hidden><div class="wrap">
+    <div class="s-bar"><svg class="ic"><use href="#i-search"/></svg><input id="sInput" type="search" placeholder="ابحث بالمنطقة أو نوع العقار..." autocomplete="off" aria-label="بحث"><button type="button" id="sClose" aria-label="إغلاق">×</button></div>
+    <div id="sResults"></div>
+  </div></div>
 </header>
 
 <section class="hero">
@@ -551,12 +575,8 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
         <button class="tab" data-deal="owner">عرض من المالك</button>
       </div>
       <div class="filters" id="filters"></div>
-      <div class="toolbar" id="toolbar">
-        <input type="search" id="q" placeholder="ابحث بالمنطقة أو الكلمة..." aria-label="بحث" autocomplete="off">
-        <select id="areaSel" aria-label="المنطقة" hidden><option value="">كل المناطق</option></select>
-        <select id="sortSel" aria-label="الترتيب"><option value="new">الأحدث</option><option value="low">الأقل سعراً</option><option value="high">الأعلى سعراً</option></select>
-        <button type="button" class="view-btn" id="viewBtn"></button>
-      </div>
+      <div class="query-chip" id="queryChip" hidden><span></span><button type="button" id="queryClear" aria-label="مسح البحث">×</button></div>
+      <div class="toolbar" id="toolbar"><button type="button" class="view-btn" id="viewBtn"></button></div>
     </div>
     <div class="rail">
       <button type="button" class="rail-btn" id="railPrev" aria-label="السابق"><svg class="ic"><use href="#i-back"/></svg></button>
@@ -835,30 +855,42 @@ function applyOrder(list){
   return arr.sort((a, b) => { const x = priceNum(a.price), y = priceNum(b.price);
     if(isNaN(x) && isNaN(y)) return 0; if(isNaN(x)) return 1; if(isNaN(y)) return -1; return (x - y) * dir; });
 }
-function renderAreas(){
-  const sel = document.getElementById('areaSel'); if(!sel) return;
-  const base = properties.filter(p => (activeDeal === 'all' || (activeDeal === 'owner' ? p.owner === true : dealKey(p.deal) === activeDeal)) && (activeType === 'الكل' || typeKey(p.type) === activeType) && matchQuery(p));
-  const groups = {};
-  base.forEach(p => { const k = areaKey(p); if(!k) return; (groups[k] = groups[k] || { n: 0, names: {} }).n++; groups[k].names[p.loc.trim()] = (groups[k].names[p.loc.trim()] || 0) + 1; });
-  const keys = Object.keys(groups).sort((a, b) => groups[b].n - groups[a].n);
-  if(activeArea && !groups[activeArea]) activeArea = '';
-  const label = k => { const best = Object.keys(groups[k].names).sort((a, b) => groups[k].names[b] - groups[k].names[a])[0]; return (best.length > 26 ? best.slice(0, 25) + '…' : best) + ' (' + groups[k].n + ')'; };
-  sel.hidden = keys.length < 2 && !activeArea;
-  sel.innerHTML = '<option value="">كل المناطق</option>' + keys.map(k => '<option value="' + esc(k) + '">' + esc(label(k)) + '</option>').join('');
-  sel.value = activeArea;
-}
 function applyViewMode(){
   const rail = document.querySelector('.rail'), b = document.getElementById('viewBtn'); if(!rail || !b) return;
   rail.classList.toggle('grid-view', viewMode === 'grid');
   b.innerHTML = viewMode === 'grid' ? '<svg class="ic"><use href="#i-rail"/></svg>عرض صف' : '<svg class="ic"><use href="#i-grid"/></svg>عرض شبكة';
 }
 (function(){
-  const q = document.getElementById('q'); if(!q) return; let t;
-  q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { query = q.value.trim(); render(); }, 150); });
-  document.getElementById('areaSel').addEventListener('change', e => { activeArea = e.target.value; track('filter', {kind: 'area', value: e.target.selectedOptions[0].textContent}); render(); });
-  document.getElementById('sortSel').addEventListener('change', e => { sortMode = e.target.value; track('filter', {kind: 'sort', value: sortMode}); render(); });
   document.getElementById('viewBtn').addEventListener('click', () => { viewMode = viewMode === 'grid' ? 'rail' : 'grid'; try{ localStorage.setItem('zidan-view', viewMode); }catch(e){} applyViewMode(); track('filter', {kind: 'view', value: viewMode}); });
   applyViewMode();
+  document.getElementById('queryClear').addEventListener('click', () => { query = ''; render(); });
+
+  // ---- search from the header magnifier ----
+  const toggle = document.getElementById('searchToggle'), panel = document.getElementById('searchPanel'), inp = document.getElementById('sInput'), res = document.getElementById('sResults');
+  const close = () => { panel.hidden = true; toggle.setAttribute('aria-expanded', 'false'); };
+  const open = () => { panel.hidden = false; toggle.setAttribute('aria-expanded', 'true'); inp.value = ''; show(''); setTimeout(() => inp.focus(), 30); track('search_open'); };
+  function show(q){
+    if(!q){
+      const g = {}; properties.forEach(p => { const k = norm(p.loc); if(k) (g[k] = g[k] || { n: 0, name: p.loc.trim() }).n++; });
+      const top = Object.values(g).sort((a, b) => b.n - a.n).slice(0, 6);
+      res.innerHTML = top.length ? '<div class="s-hint">جرّب البحث عن:</div><div class="s-sugs">' + top.map(x => '<button type="button" class="s-sug" data-q="' + esc(x.name) + '">' + esc(x.name) + '</button>').join('') + '</div>' : '<div class="s-hint">اكتب المنطقة أو نوع العقار...</div>';
+      return;
+    }
+    const nq = norm(q), hits = properties.filter(p => norm([p.title, p.loc, p.desc, p.type, p.price].join(' ')).includes(nq));
+    if(!hits.length){ res.innerHTML = '<div class="s-hint">مفيش نتايج. جرّب كلمة تانية.</div>'; return; }
+    res.innerHTML = hits.slice(0, 6).map(p => '<a class="s-item" href="?p=' + encodeURIComponent(pid(p)) + '" data-id="' + esc(pid(p)) + '"><b>' + esc(p.title || p.loc) + '</b><span>' + esc(typeKey(p.type) || p.type) + ' · ' + esc(p.loc) + (p.price ? ' · ' + esc(p.price) : '') + '</span></a>').join('')
+      + '<button type="button" class="s-all" data-q="' + esc(q) + '">' + (hits.length > 6 ? 'عرض كل النتائج (' + hits.length + ')' : 'عرض النتائج في القايمة') + '</button>';
+  }
+  toggle.addEventListener('click', () => panel.hidden ? open() : close());
+  document.getElementById('sClose').addEventListener('click', close);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && !panel.hidden) close(); });
+  document.addEventListener('click', e => { if(!panel.hidden && !e.target.closest('#searchPanel') && !e.target.closest('#searchToggle')) close(); });
+  let t; inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => show(inp.value.trim()), 120); });
+  res.addEventListener('click', e => {
+    const sug = e.target.closest('.s-sug'); if(sug){ inp.value = sug.dataset.q; show(sug.dataset.q); return; }
+    const item = e.target.closest('.s-item'); if(item){ e.preventDefault(); close(); go(item.dataset.id); return; }
+    const all = e.target.closest('.s-all'); if(all){ query = all.dataset.q; activeType = 'الكل'; setDeal('all'); close(); track('search', {value: query}); document.getElementById('listings').scrollIntoView({behavior: 'smooth'}); }
+  });
 })();
 function render(){
   const has = properties.length > 0;
@@ -866,7 +898,8 @@ function render(){
   empty.style.display = (!loading && !has) ? '' : 'none';
   tools.style.display = has ? '' : 'none';
   if(loading){ grid.innerHTML = skelCard.repeat(3); return; }
-  renderFilters(); renderAreas();
+  renderFilters();
+  const qc = document.getElementById('queryChip'); if(qc){ qc.hidden = !query; if(query) qc.querySelector('span').textContent = '🔎 ' + query; }
   const list = applyOrder(properties.filter(p=>{
     const d = activeDeal==="all" || (activeDeal==="owner" ? p.owner===true : dealKey(p.deal)===activeDeal);
     return d && (activeType==="الكل" || typeKey(p.type)===activeType) && matchQuery(p) && matchArea(p);
@@ -998,7 +1031,6 @@ document.addEventListener('click', e => {
   if(h.startsWith('https://wa.me') && !h.includes('?text=')) a.href = h + '?text=' + encodeURIComponent('أهلاً، جاي من موقع ZIDAN [' + getSource() + ']');
   if(h.startsWith('https://wa.me')) track(a.dataset.track === 'want' ? 'want' : 'whatsapp', {where: a.dataset.track || 'link'});
   else if(h.startsWith('tel:')) track('call', {where: a.dataset.track || 'link'});
-  else if(h.includes('google.com/maps')) track('map', {where: a.dataset.track || 'link'});
 });
 
 const BASE_TITLE = document.title;
@@ -1038,7 +1070,6 @@ function detailHTML(p){
       <div class="d-actions">
         <a class="btn btn-gold" target="_blank" rel="noopener" href="${inquireHref(p)}"><svg class="ic"><use href="#i-chat"/></svg>استفسر عن العقار ده</a>
         <a class="btn btn-ghost" href="tel:${CFG.tel}"><svg class="ic"><use href="#i-phone"/></svg>اتصال</a>
-        <a class="btn btn-ghost" target="_blank" rel="noopener" data-track="map" href="${/^https:\/\//.test(p.map || '') ? esc(p.map) : 'https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent((p.loc || '') + ' إيتاي البارود')}"><svg class="ic"><use href="#i-pin"/></svg>الخريطة</a>
         <button type="button" class="btn btn-ghost d-share" data-idx="${properties.indexOf(p)}"><svg class="ic"><use href="#i-share"/></svg>شير</button>
       </div>
     </div>
@@ -1238,7 +1269,7 @@ if('serviceWorker' in navigator){
 }
 
 // Auto-update: on every visit/resume compare this build with the live one and reload if different
-const PAGE_VERSION = '20261015102141';
+const PAGE_VERSION = '20261015180647';
 function userIsBusy(){
   const a = document.activeElement;
   if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
