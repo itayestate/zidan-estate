@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="build" content="20261015101350">
+<meta name="build" content="20261015102141">
 <link rel="preload" as="image" href="hero.jpg" media="(min-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preload" as="image" href="hero-m.jpg" media="(max-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preconnect" href="https://script.google.com">
@@ -443,6 +443,24 @@ html.js .hero h1{visibility:hidden;animation:up .8s ease .12s both,showH1 0s 3s 
 .rail.grid-view .rail-btn{display:none!important;}
 .rail.grid-view .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));overflow:visible;scroll-snap-type:none;padding-bottom:8px;}
 .rail.grid-view .grid>.card{flex:initial;}
+/* grid view on phones: two compact columns */
+@media(max-width:640px){
+  .rail.grid-view .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .rail.grid-view .grid>.card.want{grid-column:1/-1;}
+  .rail.grid-view .card{border-radius:14px;}
+  .rail.grid-view .card-body{padding:10px 10px 12px;gap:5px;}
+  .rail.grid-view .price{font-size:16px;}
+  .rail.grid-view .card-body h3{font-size:14px;line-height:1.4;}
+  .rail.grid-view .card-loc{font-size:12px;}
+  .rail.grid-view .card-loc .ic{width:13px;height:13px;}
+  .rail.grid-view .spec{font-size:11px;padding:3px 8px;}
+  .rail.grid-view .badges{top:8px;right:8px;left:8px;gap:4px;}
+  .rail.grid-view .badge{font-size:10.5px;padding:3px 8px;}
+  .rail.grid-view .badge-type{bottom:8px;right:8px;}
+  .rail.grid-view .card-share{display:none;}
+  .rail.grid-view .card-actions{padding-top:8px;}
+  .rail.grid-view .card-inquire{font-size:12px;padding:9px 6px;min-height:40px;}
+}
 </style>
 </head>
 <body>
@@ -1220,7 +1238,7 @@ if('serviceWorker' in navigator){
 }
 
 // Auto-update: on every visit/resume compare this build with the live one and reload if different
-const PAGE_VERSION = '20261015101350';
+const PAGE_VERSION = '20261015102141';
 function userIsBusy(){
   const a = document.activeElement;
   if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
